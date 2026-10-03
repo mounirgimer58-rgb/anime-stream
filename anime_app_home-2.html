@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ANIME — تطبيق الأنمي</title>
+<style>
+*{box-sizing:border-box} body{margin:0;background:#050a11;color:#fff;font-family:Arial,sans-serif}
+.app{max-width:500px;margin:auto;min-height:100vh;padding-bottom:85px}
+header{display:flex;align-items:center;gap:12px;padding:18px 16px 10px}
+.logo{font-size:30px;font-weight:900;color:#ff3045;font-style:italic}.logo span{color:#fff}
+.search{flex:1;background:#111d2d;border-radius:28px;padding:13px 18px;color:#9da9b8}
+.hero{margin:10px 14px;height:250px;border-radius:20px;background:linear-gradient(90deg,#05070b 5%,rgba(5,7,11,.55),rgba(5,7,11,.05)),linear-gradient(135deg,#172b43,#8c1824);padding:28px 20px;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden}
+.hero h1{margin:0 0 8px;font-size:28px}.hero p{margin:0 0 15px;color:#d4d9df;line-height:1.5}
+.btn{width:max-content;border:0;border-radius:25px;background:#ff3045;color:white;padding:12px 20px;font-weight:bold;font-size:15px}
+.section{padding:18px 14px 0;display:flex;justify-content:space-between;align-items:center}.section h2{font-size:20px;margin:0}.more{color:#ff4052}
+.genres{display:flex;gap:10px;overflow:auto;padding:14px}.genre{min-width:82px;background:#0d1725;border-radius:16px;padding:14px 8px;text-align:center;color:#dce3eb}.genre b{display:block;font-size:24px;margin-bottom:7px}
+.row{display:flex;gap:12px;overflow:auto;padding:14px}.card{min-width:125px;background:#0c1623;border-radius:12px;overflow:hidden;border:1px solid #172536}.poster{height:170px;background:linear-gradient(145deg,#273a58,#8a1d2d);display:flex;align-items:center;justify-content:center;font-weight:bold;text-align:center;padding:8px;font-size:17px}.info{padding:9px}.info strong{display:block;font-size:14px}.rating{color:#ffc928;margin-top:7px;font-size:13px}
+nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(500px,100%);background:#08111d;border-top:1px solid #1a2939;display:flex;justify-content:space-around;padding:10px 5px 12px;z-index:5}
+nav button{background:none;border:0;color:#8d9aaa;font-size:12px}.active{color:#ff3045!important}nav span{display:block;font-size:22px;margin-bottom:3px}
+.hidden{display:none}.page{padding:15px}.back{color:#ff4052;margin-bottom:15px;cursor:pointer}
+input{width:100%;padding:14px;border-radius:14px;border:1px solid #223449;background:#101b2a;color:white;font-size:16px}
+</style>
+</head>
+<body>
+<div class="app">
+<header><div class="logo">A<span>NIME</span></div><div class="search" onclick="showPage('search')">🔎 ابحث عن أنمي...</div></header>
+
+<main id="home">
+<section class="hero"><h1>One Piece</h1><p>رحلة مليئة بالمغامرات والأصدقاء والبحار اللامتناهية.</p><button class="btn" onclick="alert('صفحة المشاهدة ستضاف في الخطوة القادمة')">▶ مشاهدة الآن</button></section>
+
+<div class="section"><h2>التصنيفات</h2></div>
+<div class="genres">
+<div class="genre">🔥<b>أكشن</b></div><div class="genre">🌿<b>مغامرة</b></div><div class="genre">😂<b>كوميديا</b></div><div class="genre">👻<b>رعب</b></div><div class="genre">❤️<b>رومانسي</b></div>
+</div>
+
+<div class="section"><h2>🔥 الأكثر مشاهدة</h2><span class="more">عرض الكل</span></div>
+<div class="row" id="popular"></div>
+
+<div class="section"><h2>⭐ أحدث الإضافات</h2><span class="more">عرض الكل</span></div>
+<div class="row" id="new"></div>
+</main>
+
+<section id="search" class="page hidden">
+<div class="back" onclick="showPage('home')">← الرئيسية</div><h2>البحث عن أنمي</h2>
+<input id="searchInput" placeholder="اكتب اسم الأنمي..." oninput="searchAnime()"><div class="row" id="results"></div>
+</section>
+
+<section id="favorites" class="page hidden"><div class="back" onclick="showPage('home')">← الرئيسية</div><h2>⭐ المفضلة</h2><p>ستظهر هنا الأنميات التي تحفظها.</p></section>
+<section id="categories" class="page hidden"><div class="back" onclick="showPage('home')">← الرئيسية</div><h2>📚 التصنيفات</h2><div class="genres"><div class="genre">🔥<b>أكشن</b></div><div class="genre">🌿<b>مغامرة</b></div><div class="genre">👻<b>رعب</b></div><div class="genre">❤️<b>رومانسي</b></div></div></section>
+<section id="account" class="page hidden"><div class="back" onclick="showPage('home')">← الرئيسية</div><h2>👤 الحساب والإعدادات</h2><p>الحساب، اللغة، الإشعارات، والوضع الليلي.</p></section>
+
+<nav>
+<button class="active" onclick="showPage('home')"><span>⌂</span>الرئيسية</button>
+<button onclick="showPage('categories')"><span>☷</span>التصنيفات</button>
+<button onclick="showPage('favorites')"><span>♡</span>المفضلة</button>
+<button onclick="showPage('search')"><span>⌕</span>البحث</button>
+<button onclick="showPage('account')"><span>♙</span>حسابي</button>
+</nav>
+</div>
+<script>
+const popular=['Attack on Titan','Naruto Shippuden','Jujutsu Kaisen','Demon Slayer','Solo Leveling'];
+const newest=['SPY×FAMILY','Black Clover','Hunter × Hunter','The God of High School','Chainsaw Man'];
+function cards(arr,id){document.getElementById(id).innerHTML=arr.map((x,i)=>`<div class="card"><div class="poster">${x}</div><div class="info"><strong>${x}</strong><div class="rating">★ ${(8.5+i/10).toFixed(1)}</div></div></div>`).join('')}
+cards(popular,'popular');cards(newest,'new');
+function showPage(id){document.querySelectorAll('main,section.page').forEach(x=>x.classList.add('hidden'));document.getElementById(id).classList.remove('hidden')}
+function searchAnime(){let q=document.getElementById('searchInput').value.toLowerCase();cards([...popular,...newest].filter(x=>x.toLowerCase().includes(q)),'results')}
+</script>
+</body>
+</html>
