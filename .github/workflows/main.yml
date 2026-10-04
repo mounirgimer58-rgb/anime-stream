@@ -16,11 +16,14 @@ jobs:
         with:
           flutter-version: '3.35.0'
           channel: stable
+
       - name: إنشاء ملفات Android
         run: flutter create --platforms=android .
+
       - name: تفعيل الإنترنت في Android
         run: |
-          sed -i '/<application/i\    <uses-permission android:name="android.permission.INTERNET"/>' android/app/src/main/AndroidManifest.xml
+          sed -i '/<manifest xmlns:android="http:\/\/schemas.android.com\/apk\/res\/android">/a\    <uses-permission android:name="android.permission.INTERNET"/>' android/app/src/main/AndroidManifest.xml
+
       - name: تثبيت الحزم
         run: flutter pub get
 
@@ -32,4 +35,3 @@ jobs:
         with:
           name: anime-stream-apk
           path: build/app/outputs/flutter-apk/app-release.apk
-      
