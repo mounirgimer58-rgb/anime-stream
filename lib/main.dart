@@ -1315,77 +1315,73 @@ class EpisodeTile extends StatelessWidget {
           child: Text(
             number.toString(),
           ),
-        ),
-        title: Text(
-          title.toString(),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        ),
-        trailing: IconButton(
-          icon: const Icon(Icons.play_arrow),
-          onPressed: () {
-            showDialog(
-              context: context,
-              builder: (_) => AlertDialog(
-                title: Text(
-                  AppText.t(language, 'watch'),
-                ),
-                content: Text(
-                  AppText.t(language, 'watchMessage'),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(
-                      AppText.t(language, 'ok'),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
-}
+class AnimeCard extends StatelessWidget {
+  final Anime anime;
+  final VoidCallback onTap;
 
-// =========================
-// ERROR BOX
-// =========================
-
-class ErrorBox extends StatelessWidget {
-  final String text;
-  final String retryText;
-  final VoidCallback onRetry;
-
-  const ErrorBox({
-    required this.text,
-    required this.retryText,
-    required this.onRetry,
+  const AnimeCard({
+    required this.anime,
+    required this.onTap,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(30),
+    return SizedBox(
+      width: 150,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 50,
+            SizedBox(
+              height: 210,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(18),
+                child: Image.network(
+                  anime.image,
+                  width: 150,
+                  height: 210,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(
+                    width: 150,
+                    height: 210,
+                    color: const Color(0xFF151A2A),
+                    child: const Icon(
+                      Icons.image_not_supported,
+                      size: 40,
+                    ),
+                  ),
+                ),
+              ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             Text(
-              text,
-              textAlign: TextAlign.center,
+              anime.title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontWeight: FontWeight.w700,
+              ),
             ),
-            const SizedBox(height: 14),
-            FilledButton(
-              onPressed: onRetry,
-              child: Text(retryText),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                const Icon(
+                  Icons.star,
+                  color: Colors.amber,
+                  size: 16,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  anime.score.toString(),
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -1393,4 +1389,3 @@ class ErrorBox extends StatelessWidget {
     );
   }
 }
-  
