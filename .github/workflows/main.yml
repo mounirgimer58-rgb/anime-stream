@@ -16,7 +16,8 @@ jobs:
         with:
           flutter-version: '3.35.0'
           channel: stable
-
+      - name: إنشاء ملفات Android
+        run: flutter create --platforms=android .
       - name: تثبيت الحزم
         run: flutter pub get
 
