@@ -88,7 +88,7 @@ class Api {
   final data = body['data'] as List;
 
   return data.map((x) => Anime.fromJson(x)).toList();
-   {
+    }
     final r = await http.get(Uri.parse('$base/top/anime?limit=12'));
     if (r.statusCode != 200) throw Exception('API error');
     final data = jsonDecode(r.body)['data'] as List;
