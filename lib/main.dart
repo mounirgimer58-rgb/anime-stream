@@ -774,5 +774,623 @@ class AnimeCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: ClipRRect(
+            child: ClipRRect(
+  borderRadius: BorderRadius.circular(18),
+  child: Image.network(
+    anime.image,
+    height: 210,
+    width: 150,
+    fit: BoxFit.cover,
+    errorBuilder: (_, __, ___) => Container(
+      height: 210,
+      width: 150,
+      color: const Color(0xFF151A2A),
+      child: const Icon(
+        Icons.image_not_supported,
+        size: 40,
+      ),
+    ),
+  ),
+),
+const SizedBox(height: 8),
+Text(
+  anime.title,
+  maxLines: 2,
+  overflow: TextOverflow.ellipsis,
+  style: const TextStyle(
+    fontWeight: FontWeight.w700,
+  ),
+),
+const SizedBox(height: 4),
+Row(
+  children: [
+    const Icon(
+      Icons.star,
+      color: Colors.amber,
+      size: 16,
+    ),
+    const SizedBox(width: 4),
+    Text(
+      anime.score.toString(),
+      style: const TextStyle(
+        color: Colors.white70,
+        fontSize: 13,
+      ),
+    ),
+  ],
+),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// =========================
+// ANIME LIST TILE
+// =========================
+
+class AnimeListTile extends StatelessWidget {
+  final Anime anime;
+  final VoidCallback onTap;
+
+  const AnimeListTile({
+    required this.anime,
+    required this.onTap,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 10),
+      child: ListTile(
+        onTap: onTap,
+        leading: ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: Image.network(
+            anime.image,
+            width: 55,
+            height: 70,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => const Icon(
+              Icons.image_not_supported,
+            ),
+          ),
+        ),
+        title: Text(
+          anime.title,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+        subtitle: Text(
+          '⭐ ${anime.score} • ${anime.year}',
+        ),
+        trailing: const Icon(Icons.chevron_right),
+      ),
+    );
+  }
+}
+
+// =========================
+// SEARCH PAGE
+// =========================
+
+class SearchPage extends StatefulWidget {
+  final AppLanguage language;
+  final ValueChanged<Anime> onOpen;
+
+  const SearchPage({
+    required this.language,
+    required this.onOpen,
+    super.key,
+  });
+
+  @override
+  State<SearchPage> createState() => _SearchPageState();
+}
+
+class _SearchPageState extends State<SearchPage> {
+  final controller = TextEditingController();
+
+  List<Anime> results = [];
+  bool loading = false;
+  String? error;
+
+  String tr(String key) => AppText.t(widget.language, key);
+
+  Future<void> search() async {
+    final query = controller.text.trim();
+
+    if (query.isEmpty) return;
+
+    setState(() {
+      loading = true;
+      error = null;
+    });
+
+    try {
+      final data = await Api.search(query);
+
+      if (!mounted) return;
+
+      setState(() {
+        results = data;
+        loading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+
+      setState(() {
+        loading = false;
+        error = tr('loadingError');
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        const SizedBox(height: 10),
+        Text(
+          tr('search'),
+          style: const TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        const SizedBox(height: 18),
+        TextField(
+          controller: controller,
+          textInputAction: TextInputAction.search,
+          onSubmitted: (_) => search(),
+          decoration: InputDecoration(
+            hintText: tr('searchHint'),
+            prefixIcon: const Icon(Icons.search),
+            suffixIcon: IconButton(
+              onPressed: search,
+              icon: const Icon(Icons.arrow_forward),
+            ),
+            filled: true,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide.none,
+            ),
+          ),
+        ),
+        const SizedBox(height: 20),
+        if (loading)
+          const Center(
+            child: Padding(
+              padding: EdgeInsets.all(30),
+              child: CircularProgressIndicator(),
+            ),
+          )
+        else if (error != null)
+          ErrorBox(
+            text: error!,
+            retryText: tr('retry'),
+            onRetry: search,
+          )
+        else
+          ...results.map(
+            (anime) => AnimeListTile(
+              anime: anime,
+              onTap: () => widget.onOpen(anime),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+// =========================
+// FAVORITES PAGE
+// =========================
+
+class FavoritesPage extends StatelessWidget {
+  final AppLanguage language;
+  final List<Anime> items;
+  final ValueChanged<Anime> onOpen;
+
+  const FavoritesPage({
+    required this.language,
+    required this.items,
+    required this.onOpen,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final title = AppText.t(language, 'favorites');
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        const SizedBox(height: 10),
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        const SizedBox(height: 18),
+        if (items.isEmpty)
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(40),
+              child: Text(
+                AppText.t(language, 'noFavorites'),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          )
+        else
+          ...items.map(
+            (anime) => AnimeListTile(
+              anime: anime,
+              onTap: () => onOpen(anime),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+// =========================
+// SETTINGS PAGE
+// =========================
+
+class SettingsPage extends StatelessWidget {
+  final AppLanguage language;
+  final ValueChanged<AppLanguage> onLanguageChanged;
+
+  const SettingsPage({
+    required this.language,
+    required this.onLanguageChanged,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        const SizedBox(height: 10),
+        Text(
+          AppText.t(language, 'account'),
+          style: const TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        const SizedBox(height: 20),
+        Card(
+          child: ListTile(
+            leading: const Icon(Icons.language),
+            title: Text(
+              AppText.t(language, 'language'),
+            ),
+            trailing: DropdownButton<AppLanguage>(
+              value: language,
+              underline: const SizedBox(),
+              items: AppLanguage.values.map(
+                (item) {
+                  return DropdownMenuItem(
+                    value: item,
+                    child: Text(
+                      AppText.languageName(item),
+                    ),
+                  );
+                },
+              ).toList(),
+              onChanged: (value) {
+                if (value != null) {
+                  onLanguageChanged(value);
+                }
+              },
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Card(
+          child: ListTile(
+            leading: const Icon(Icons.dark_mode),
+            title: Text(
+              AppText.t(language, 'dark'),
+            ),
+            trailing: const Icon(Icons.check),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Card(
+          child: ListTile(
+            leading: const Icon(Icons.info_outline),
+            title: Text(
+              AppText.t(language, 'about'),
+            ),
+            subtitle: const Text('Anime Stream 1.0'),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// =========================
+// DETAIL PAGE
+// =========================
+
+class DetailPage extends StatefulWidget {
+  final Anime anime;
+  final AppLanguage language;
+  final bool isFavorite;
+  final VoidCallback onFavorite;
+
+  const DetailPage({
+    required this.anime,
+    required this.language,
+    required this.isFavorite,
+    required this.onFavorite,
+    super.key,
+  });
+
+  @override
+  State<DetailPage> createState() => _DetailPageState();
+}
+
+class _DetailPageState extends State<DetailPage> {
+  late bool favorite;
+  List<Map<String, dynamic>> episodes = [];
+  bool loadingEpisodes = true;
+
+  @override
+  void initState() {
+    super.initState();
+    favorite = widget.isFavorite;
+    loadEpisodes();
+  }
+
+  Future<void> loadEpisodes() async {
+    final result = await Api.episodes(widget.anime.id);
+
+    if (!mounted) return;
+
+    setState(() {
+      episodes = result;
+      loadingEpisodes = false;
+    });
+  }
+
+  String tr(String key) => AppText.t(widget.language, key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.anime.title),
+        actions: [
+          IconButton(
+            onPressed: () {
+              setState(() {
+                favorite = !favorite;
+              });
+              widget.onFavorite();
+            },
+            icon: Icon(
+              favorite ? Icons.favorite : Icons.favorite_border,
+            ),
+          ),
+        ],
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(22),
+            child: Image.network(
+              widget.anime.image,
+              height: 360,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Container(
+                height: 360,
+                color: const Color(0xFF151A2A),
+                child: const Icon(
+                  Icons.image_not_supported,
+                  size: 50,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 18),
+          Text(
+            widget.anime.title,
+            style: const TextStyle(
+              fontSize: 27,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              Chip(
+                avatar: const Icon(Icons.star, size: 16),
+                label: Text(
+                  '${tr('score')}: ${widget.anime.score}',
+                ),
+              ),
+              if (widget.anime.year.isNotEmpty)
+                Chip(
+                  label: Text(
+                    '${tr('year')}: ${widget.anime.year}',
+                  ),
+                ),
+              Chip(
+                label: Text(widget.anime.status),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Text(
+            tr('story'),
+            style: const TextStyle(
+              fontSize: 21,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            widget.anime.synopsis.isEmpty
+                ? tr('noSynopsis')
+                : widget.anime.synopsis,
+            style: const TextStyle(
+              color: Colors.white70,
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            tr('episodes'),
+            style: const TextStyle(
+              fontSize: 21,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 10),
+          if (loadingEpisodes)
+            const Center(
+              child: Padding(
+                padding: EdgeInsets.all(20),
+                child: CircularProgressIndicator(),
+              ),
+            )
+          else if (episodes.isEmpty)
+            Text(
+              'No episodes available.',
+              style: const TextStyle(
+                color: Colors.white70,
+              ),
+            )
+          else
+            ...episodes.map(
+              (episode) => EpisodeTile(
+                episode: episode,
+                language: widget.language,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+// =========================
+// EPISODE TILE
+// =========================
+
+class EpisodeTile extends StatelessWidget {
+  final Map<String, dynamic> episode;
+  final AppLanguage language;
+
+  const EpisodeTile({
+    required this.episode,
+    required this.language,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final number = episode['mal_id'] ?? 0;
+    final title = episode['title'] ?? 'Episode $number';
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: ListTile(
+        leading: CircleAvatar(
+          child: Text(
+            number.toString(),
+          ),
+        ),
+        title: Text(
+          title.toString(),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+        trailing: IconButton(
+          icon: const Icon(Icons.play_arrow),
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (_) => AlertDialog(
+                title: Text(
+                  AppText.t(language, 'watch'),
+                ),
+                content: Text(
+                  AppText.t(language, 'watchMessage'),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(
+                      AppText.t(language, 'ok'),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+// =========================
+// ERROR BOX
+// =========================
+
+class ErrorBox extends StatelessWidget {
+  final String text;
+  final String retryText;
+  final VoidCallback onRetry;
+
+  const ErrorBox({
+    required this.text,
+    required this.retryText,
+    required this.onRetry,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(30),
+        child: Column(
+          children: [
+            const Icon(
+              Icons.error_outline,
+              size: 50,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              text,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 14),
+            FilledButton(
+              onPressed: onRetry,
+              child: Text(retryText),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
   
