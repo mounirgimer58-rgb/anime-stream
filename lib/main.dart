@@ -76,6 +76,19 @@ class Api {
   static const base = 'https://api.jikan.moe/v4';
 
   static Future<List<Anime>> topAnime() async {
+  final r = await http.get(
+    Uri.parse('$base/top/anime?limit=12'),
+  );
+
+  if (r.statusCode != 200) {
+    throw Exception('API error: ${r.statusCode}');
+  }
+
+  final body = jsonDecode(r.body);
+  final data = body['data'] as List;
+
+  return data.map((x) => Anime.fromJson(x)).toList();
+  } {
     final r = await http.get(Uri.parse('$base/top/anime?limit=12'));
     if (r.statusCode != 200) throw Exception('API error');
     final data = jsonDecode(r.body)['data'] as List;
@@ -99,7 +112,7 @@ class Api {
 
   static Future<List<Map<String, dynamic>>> episodes(int id) async {
     final r = await http.get(Uri.parse('$base/anime/$id/episodes?limit=25'));
-    if (r.statusCode != 200) return [];
+    if (r.satusCode != 200) return [];
     final data = jsonDecode(r.body)['data'] as List;
     return data.cast<Map<String, dynamic>>();
   }
