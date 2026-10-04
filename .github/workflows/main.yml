@@ -18,7 +18,7 @@ jobs:
           channel: stable
       - name: إنشاء ملفات Android
         run: flutter create --platforms=android .
-            - name: تفعيل الإنترنت في Android
+            - name:تفعيل الإنترنت في Android
         run: |
           sed -i '/<application/i\    <uses-permission android:name="android.permission.INTERNET"/>' android/app/src/main/AndroidManifest.xml
       - name: تثبيت الحزم
